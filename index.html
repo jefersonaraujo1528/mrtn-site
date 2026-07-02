@@ -590,10 +590,45 @@
 </a>
 
 <script>
+  // backup do lead na nuvem (Supabase) — dispara antes do WhatsApp;
+  // se a pessoa desistir de enviar a mensagem, o contato não se perde
+  var SUPA_URL = 'https://wtirdmwrttoxpljxsoci.supabase.co';
+  var SUPA_KEY = 'sb_publishable_9UF6Ebv3mkxVP2x4kx-eZA_5dDPPuf0';
+  function salvarLead(f) {
+    try {
+      var id = 'sitelead_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+      fetch(SUPA_URL + '/rest/v1/medicos', {
+        method: 'POST',
+        keepalive: true,
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + SUPA_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify([{
+          id: id,
+          data: {
+            origem: 'site',
+            nome: f.nome.value,
+            whatsapp: f.whatsapp.value,
+            email: f.email.value || null,
+            segmento: f.segmento.value,
+            faturamento: f.faturamento.value,
+            anuncios: f.anuncios.value,
+            desafio: f.desafio.value,
+            quando: new Date().toISOString()
+          },
+          updated_at: new Date().toISOString()
+        }])
+      }).catch(function () {});
+    } catch (err) { /* nunca travar o fluxo do WhatsApp */ }
+  }
+
   // qualificação -> WhatsApp
   document.getElementById('lead-form').addEventListener('submit', function (e) {
     e.preventDefault();
     var f = e.target;
+    salvarLead(f);
     var linhas = [
       'Olá, Jeferson! Quero minha *Consultoria Especializada MRTN gratuita*.',
       '',
